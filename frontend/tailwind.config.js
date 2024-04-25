@@ -2,6 +2,9 @@
 export default {
   content: ["./src/**/*.{html,js,jsx}"],
   theme: {
+    fontFamily: {
+      'sans': ['Fira Sans', 'sans-serif'],
+    },
     extend: {},
   },
   plugins: [require("daisyui")],
