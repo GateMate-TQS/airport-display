@@ -1,6 +1,6 @@
 FROM node:21-alpine
 
-WORKDIR /frontend
+WORKDIR /airport-display/frontend
 
 COPY package*.json ./
 
