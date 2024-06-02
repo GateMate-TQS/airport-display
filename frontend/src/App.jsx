@@ -44,10 +44,8 @@ function App() {
   const [flights, setFlights] = useState([]);
 
   const getRandomGate = () => {
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const letter = letters[Math.floor(Math.random() * letters.length)];
     const number = Math.floor(Math.random() * 30) + 1;
-    return `${letter}${number}`;
+    return `${number}`;
   };
 
   const getRandomStatus = () => {
