@@ -1,22 +1,20 @@
-import React, { useState } from "react";
-//import "./css/main.css";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./css/coiso.scss";
 import { FaPlaneDeparture } from "react-icons/fa";
 
 function Flight({ flight }) {
-  // Function to generate departure board based on flight data
   const generateDepartureBoard = (flightNumber, destination, gate, status) => {
-    // Concatenate flight information into a single string
-    let flightInfo = `${flightNumber} ${destination} ${gate} ${status}`;
     const rowsize = 32;
-    const spaces = rowsize - flightInfo.length;
 
-    // Add spaces to the end of the string to make it 32 characters long
-    for (let i = 0; i < spaces; i++) {
-      flightInfo += " ";
-    }
+    let flightNumberStr = flightNumber.padEnd(7, " ");
+    let destinationStr = destination.padEnd(9, " ");
+    let gateStr = gate.padEnd(5, " ");
+    let statusStr = status.padEnd(10, " ");
 
-    // Split the concatenated string into individual letters
+    let flightInfo = flightNumberStr + destinationStr + gateStr + statusStr;
+    flightInfo = flightInfo.padEnd(rowsize, " ");
+
     const letters = flightInfo
       .split("")
       .map((letter, index) => (
@@ -43,64 +41,50 @@ function Flight({ flight }) {
 }
 
 function App() {
-  const [flights, setFlights] = useState([
-    {
-      id: 1,
-      flightNumber: "AB123",
-      destination: "Madrid",
-      gate: "A1",
-      status: "On time",
-    },
-    {
-      id: 2,
-      flightNumber: "CD456",
-      destination: "Lisbon",
-      gate: "B2",
-      status: "Delayed",
-    },
-    {
-      id: 3,
-      flightNumber: "EF789",
-      destination: "London",
-      gate: "C3",
-      status: "Boarding",
-    },
-    {
-      id: 4,
-      flightNumber: "GH012",
-      destination: "Paris",
-      gate: "D4",
-      status: "Cancelled",
-    },
-    {
-      id: 5,
-      flightNumber: "IJ345",
-      destination: "Berlin",
-      gate: "E5",
-      status: "On time",
-    },
-    {
-      id: 6,
-      flightNumber: "KL678",
-      destination: "Rome",
-      gate: "F6",
-      status: "Delayed",
-    },
-    {
-      id: 7,
-      flightNumber: "MN901",
-      destination: "Amsterdam",
-      gate: "G7",
-      status: "Boarding",
-    },
-    {
-      id: 8,
-      flightNumber: "OP234",
-      destination: "Dublin",
-      gate: "H8",
-      status: "Cancelled",
-    },
-  ]);
+  const [flights, setFlights] = useState([]);
+
+  const getRandomGate = () => {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const letter = letters[Math.floor(Math.random() * letters.length)];
+    const number = Math.floor(Math.random() * 30) + 1;
+    return `${letter}${number}`;
+  };
+
+  const getRandomStatus = () => {
+    const statuses = ["On time", "Delayed", "Boarding", "Cancelled"];
+    return statuses[Math.floor(Math.random() * statuses.length)];
+  };
+
+  useEffect(() => {
+    const fetchFlights = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost/api/flight/allFlights"
+        );
+        const flightsData = response.data
+          .map((flight) => ({
+            id: flight.id,
+            flightNumber: flight.flightIata,
+            destination: flight.destination.name,
+            gate: getRandomGate(),
+            status: getRandomStatus(),
+            scheduledTime: new Date(flight.destination.scheduled),
+          }))
+          .filter((flight) => flight.destination.length <= 8)
+          .sort((a, b) => a.scheduledTime - b.scheduledTime)
+          .slice(0, 10);
+        setFlights(flightsData);
+      } catch (error) {
+        console.error("Error fetching flights data:", error);
+      }
+    };
+
+    fetchFlights();
+
+    const interval = setInterval(fetchFlights, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
