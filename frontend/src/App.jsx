@@ -59,7 +59,7 @@ function App() {
     const fetchFlights = async () => {
       try {
         const response = await axios.get(
-          "http://localhost/api/flight/allFlights"
+          "http://deti-tqs-04.ua.pt/api/flight/allFlights"
         );
         const flightsData = response.data
           .map((flight) => ({
