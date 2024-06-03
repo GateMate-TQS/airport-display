@@ -42,6 +42,8 @@ function Flight({ flight }) {
 
 function App() {
   const [flights, setFlights] = useState([]);
+  const [displayedFlights, setDisplayedFlights] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const getRandomGate = () => {
     const number = Math.floor(Math.random() * 30) + 1;
@@ -69,20 +71,28 @@ function App() {
             scheduledTime: new Date(flight.destination.scheduled),
           }))
           .filter((flight) => flight.destination.length <= 8)
-          .sort((a, b) => a.scheduledTime - b.scheduledTime)
-          .slice(0, 10);
+          .sort((a, b) => a.scheduledTime - b.scheduledTime);
         setFlights(flightsData);
+        setCurrentIndex(0); // Reset index on new data fetch
       } catch (error) {
         console.error("Error fetching flights data:", error);
       }
     };
 
     fetchFlights();
+    const fetchInterval = setInterval(fetchFlights, 60000);
 
-    const interval = setInterval(fetchFlights, 60000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(fetchInterval);
   }, []);
+
+  useEffect(() => {
+    const displayInterval = setInterval(() => {
+      setDisplayedFlights(flights.slice(currentIndex, currentIndex + 10));
+      setCurrentIndex((prevIndex) => (prevIndex + 10) % flights.length);
+    }, 10000);
+
+    return () => clearInterval(displayInterval);
+  }, [flights, currentIndex]);
 
   return (
     <>
@@ -105,7 +115,7 @@ function App() {
             </div>
           </div>
           <div>
-            {flights.map((flight) => (
+            {displayedFlights.map((flight) => (
               <Flight key={flight.id} flight={flight} />
             ))}
           </div>
